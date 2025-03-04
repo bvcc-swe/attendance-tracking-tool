@@ -24,3 +24,4 @@ yarn-error.log*
 .DS_Store
 
 /server/database.db
+/server/node_modules
