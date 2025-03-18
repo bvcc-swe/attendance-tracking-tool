@@ -25,7 +25,7 @@ function initializeNextId(callback) {
 
 // Initialize the nextId value, then process the CSV file
 initializeNextId(() => {
-  let rowCount = 0;
+  rowCount = 0;
   let errorReport = [];
 
   fs.createReadStream(csvFilePath)
