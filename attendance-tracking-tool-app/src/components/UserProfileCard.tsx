@@ -1,4 +1,5 @@
 import React from "react";
+import "../assets/styles/UserProfileCard.css";
 interface UserProfileProps {
     name: string;
     email: string;

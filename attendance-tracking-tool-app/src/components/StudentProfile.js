@@ -1,6 +1,6 @@
 //This is where the student profile card will be displayed for each student
 import React from "react";
-import UserProfileCard from "../UserProfileCard"; 
+import UserProfileCard from "./UserProfileCard.tsx"; 
 
 const StudentProfile = () => {
   // Sample student data
