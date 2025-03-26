@@ -1,4 +1,3 @@
-// db.js
 const sqlite3 = require('sqlite3').verbose();
 
 // Connect to (or create) the database file "database.db" in the current folder
