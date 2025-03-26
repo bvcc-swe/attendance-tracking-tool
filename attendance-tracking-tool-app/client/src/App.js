@@ -1,5 +1,7 @@
+import React from "react";
 import logo from './logo.svg';
 import './App.css';
+import StudentProfile from "./pages/StudentProfile";
 
 function App() {
   return (
@@ -18,6 +20,9 @@ function App() {
           Learn React
         </a>
       </header>
+
+       {/* Render the StudentProfile page */}
+       <StudentProfile />
     </div>
   );
 }
