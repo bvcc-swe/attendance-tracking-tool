@@ -14,6 +14,18 @@ app.get('/', (req, res) => {
   res.send('Hello from the server!');
 });
 
+const { getStudentViews } = require('./queries');
+
+app.get('/student-views', (req, res) => {
+  getStudentViews((err, views) => {
+    if (err) {
+      return res.status(500).json({ error: 'Error retrieving student views' });
+    }
+    return res.json(views);
+  });
+});
+
+
 // GET /users - This will retrieve all of the users
 app.get('/users', (req, res) => {
   const query = "SELECT * FROM users";
@@ -28,7 +40,7 @@ app.get('/users', (req, res) => {
 
 // POST /users - Create a new user account
 app.post('/users', (req, res) => {
-  const { name, email, university, attendance_count } = req.body;
+  const { name, email, university, track, attendance_count } = req.body;
 
   // 1. Validate required fields, Needs both (name, email) in order for account creation
   if (!name || !email) {
@@ -57,15 +69,15 @@ app.post('/users', (req, res) => {
       const newIdNumber = row && row.maxId ? row.maxId + 1 : 10000;
       const id = `USR-${newIdNumber}`;
 
-      // 4. Insert the new user into the database
+      
       const insertQuery = `
-        INSERT INTO users (id, name, email, university, attendance_count, certificateEligible)
-        VALUES (?, ?, ?, ?, ?, ?)
+        INSERT INTO users (id, name, email, university, track, attendance_count, certificateEligible)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
       `;
-      db.run(insertQuery, [id, name, email, university, attendance_count || 0, false], function(err) {
+      db.run(insertQuery, [id, name, email, university, track, attendance_count || 0, false], function(err) {
         if (err) {
           console.error('Error inserting user:', err.message);
-          // Handle potential UNIQUE constraint error
+          
           if (err.message.includes('UNIQUE constraint failed: users.email')) {
             return res.status(400).json({ error: 'Error: Account already created with this email.' });
           } else {
@@ -79,6 +91,7 @@ app.post('/users', (req, res) => {
             name,
             email,
             university,
+            track: track || null,
             attendance_count: attendance_count || 0,
             certificateEligible: false
           }
