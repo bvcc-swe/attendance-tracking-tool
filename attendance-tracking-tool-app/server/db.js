@@ -18,7 +18,7 @@ pool.query('SELECT NOW()', (err, res) => {
   }
 });
 
-// Create the users table if it doesn't exist
+// Create the "users" table if it doesn't exist
 const createTableQuery = `
   CREATE TABLE IF NOT EXISTS users (
     id TEXT PRIMARY KEY,

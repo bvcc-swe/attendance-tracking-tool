@@ -24,7 +24,6 @@ app.get('/student-views', async (req, res) => {
   }
 });
 
-
 app.get('/users', async (req, res) => {
   try {
     const result = await db.query("SELECT * FROM users");
