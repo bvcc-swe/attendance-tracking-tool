@@ -2,7 +2,7 @@
 const fs = require('fs');
 const csv = require('csv-parser');
 const path = require('path');
-const db = require('./db'); // Reuse the SQLite connection and schema from db.js
+const db = require('./db'); // Reuse the same SQLite connection and schema from db.js
 
 // Path to your CSV file (example.csv)
 const csvFilePath = path.join(__dirname, 'example.csv');
@@ -29,74 +29,85 @@ initializeNextId(() => {
   let rowCount = 0;
   let errorReport = [];
 
-  fs.createReadStream(csvFilePath)
-    .pipe(csv())
-    .on('data', (row) => {
-      rowCount++;
+  const stream = fs.createReadStream(csvFilePath).pipe(csv());
 
-      // Validate required fields: name and email must exist
-      if (!row.name || !row.email) {
-        console.warn(`Row ${rowCount}: Missing required fields. Skipping row.`);
-        errorReport.push(`Row ${rowCount}: Missing required fields.`);
-        return; // Skip this row
+  stream.on('data', (row) => {
+    // Pause the stream so that we process one row at a time
+    stream.pause();
+    rowCount++;
+
+    // Validate required fields: name and email must exist
+    if (!row.name || !row.email) {
+      console.warn(`Row ${rowCount}: Missing required fields. Skipping row.`);
+      errorReport.push(`Row ${rowCount}: Missing required fields.`);
+      stream.resume();
+      return; // Skip this row
+    }
+
+    const { name, email, university, track } = row;
+    // Convert attendance_count to a number, default to 1 if not provided
+    const additionalAttendance = parseInt(row.attendance_count, 10) || 1;
+
+    // Check if the user already exists by email
+    db.get('SELECT id, attendance_count FROM users WHERE email = ?', [email], (err, existingUser) => {
+      if (err) {
+        console.error(`Row ${rowCount}: DB error during lookup for ${email}: ${err.message}`);
+        errorReport.push(`Row ${rowCount} (${email}): ${err.message}`);
+        stream.resume();
+        return;
       }
-
-      // Generate a sequential ID for new accounts using the initialized nextId
-      // This is used only if the account does not exist.
-      const newId = `USR-${nextId}`;
-      // We'll increment nextId only when inserting a new account.
-      // For existing users, we update the attendance count.
-
-      const { name, email, university, track } = row;
-      // Convert attendance_count to a number, or default to 1 if it is invalid
-      // (Assuming each row represents 1 session, or it can be a numeric value from the CSV)
-      const additionalAttendance = parseInt(row.attendance_count, 10) || 1;
-
-      // SQL query to insert the user.
-      // If a conflict occurs on email, update:
-      // - attendance_count by adding the new attendance value
-      // - other fields (name, university) get updated as well
-      const query = `
-        INSERT INTO users (id, name, email, university, track, attendance_count, certificateEligible)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-        ON CONFLICT(email) DO UPDATE
-        SET name = excluded.name,
-            university = excluded.university,
-            track = excluded.track,
-            attendance_count = users.attendance_count + excluded.attendance_count,
-            certificateEligible = excluded.certificateEligible
-      `;
-      db.run(query, [newId, name, email, university, track, additionalAttendance, false], (err) => {
-        if (err) {
-          console.error(`Error inserting row ${rowCount} (email: ${email}): ${err.message}`);
-          errorReport.push(`Row ${rowCount} (email: ${email}): ${err.message}`);
-        } else {
-          console.log(`Processed user: ${name} - ${email}`);
-          // Only increment nextId if a new row was actually inserted.
-          // If the user already existed, their record is updated and nextId remains the same.
-          // Since ON CONFLICT doesn't tell us if it was an insert or an update,
-          // one approach is to assume that if it's a new email, nextId is used.
-          // (If needed, you could add extra logic to verify insertion vs update.)
-          // For simplicity, if you assume that each CSV row for a new user is unique,
-          // then increment nextId after every insertion attempt.
-          nextId++;
-        }
-      });
-    })
-    .on('end', () => {
-      if (rowCount === 0) {
-        console.error('Error: CSV file is empty or no valid rows found.');
+      if (existingUser) {
+        // If the user exists, update the attendance_count by adding additionalAttendance
+        const updateQuery = `
+          UPDATE users
+          SET attendance_count = attendance_count + ?
+          WHERE email = ?
+        `;
+        db.run(updateQuery, [additionalAttendance, email], (err) => {
+          if (err) {
+            console.error(`Error updating row ${rowCount} (email: ${email}): ${err.message}`);
+            errorReport.push(`Row ${rowCount} (${email}): ${err.message}`);
+          } else {
+            console.log(`Updated user: ${name} (${email}) with +${additionalAttendance} attendance.`);
+          }
+          stream.resume();
+        });
       } else {
-        console.log(`CSV file successfully processed! Total rows processed: ${rowCount}`);
-        if (errorReport.length > 0) {
-          console.warn('Some rows encountered errors:');
-          errorReport.forEach((msg) => console.warn(msg));
-        } else {
-          console.log('All rows processed successfully.');
-        }
+        // If the user does not exist, insert a new record with the new sequential ID
+        const newId = `USR-${nextId}`;
+        const insertQuery = `
+          INSERT INTO users (id, name, email, university, track, attendance_count, certificateEligible)
+          VALUES (?, ?, ?, ?, ?, ?, ?)
+        `;
+        db.run(insertQuery, [newId, name, email, university, track || null, additionalAttendance, false], (err) => {
+          if (err) {
+            console.error(`Error inserting row ${rowCount} (email: ${email}): ${err.message}`);
+            errorReport.push(`Row ${rowCount} (${email}): ${err.message}`);
+          } else {
+            console.log(`Inserted new user: ${name} (${email}) with ID: ${newId}`);
+            nextId++; // Increment nextId only for new insertions
+          }
+          stream.resume();
+        });
       }
-    })
-    .on('error', (err) => {
-      console.error('Error reading CSV file:', err.message);
     });
+  });
+
+  stream.on('end', () => {
+    if (rowCount === 0) {
+      console.error('Error: CSV file is empty or no valid rows found.');
+    } else {
+      console.log(`CSV file successfully processed! Total rows processed: ${rowCount}`);
+      if (errorReport.length > 0) {
+        console.warn('Some rows encountered errors:');
+        errorReport.forEach((msg) => console.warn(msg));
+      } else {
+        console.log('All rows processed successfully.');
+      }
+    }
+  });
+
+  stream.on('error', (err) => {
+    console.error('Error reading CSV file:', err.message);
+  });
 });
