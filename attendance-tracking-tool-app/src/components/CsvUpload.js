@@ -1,5 +1,6 @@
 //This is the react code that allows users to upload a CSV file
 import React from 'react';
+import './CsvUpload.css'
 
 function CsvUpload() {
   return (
