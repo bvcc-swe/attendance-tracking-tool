@@ -30,4 +30,4 @@ const UploadButton: React.FC<UploadButtonProps> = ({ onFileUpload }) => {
     );
 };
 
-export default UploadButton;
+export default UploadButton;  //exports the Upload button component
