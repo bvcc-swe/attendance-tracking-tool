@@ -23,7 +23,7 @@ interface UserProfileProps {
   }) => {
     return (
         <div className="user-profile-card">
-          <h2>John Doe {name}</h2> 
+          <h2>{name}</h2> 
           <p><strong>Email:</strong> {email}</p>
           <p><strong>University:</strong> {university}</p>
           <p><strong>Major:</strong> {major}</p>
