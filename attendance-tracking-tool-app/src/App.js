@@ -1,6 +1,6 @@
 import React from "react";
 import './App.css';
-import StudentProfile from "./components/StudentProfile.js";
+import StudentProfile from "./components/StudentProfilePage.js";
 
 function App() {
   return (
