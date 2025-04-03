@@ -3,22 +3,10 @@ import React from "react";
 import UserProfileCard from "./UserProfileCard.tsx"; 
 
 const StudentProfile = () => {
-  // Sample student data
-  const student = {
-    name: "Stephanie",
-    email: "steph@example.com",
-    university: "Morgan State University",
-    major: "Computer Science",
-    classification: "Freshman",
-    track: "Software Engineering",
-    attendanceCount: 5,
-    certificateEligibility: "Eligible"
-  };
-
   return (
-    <div>
-      <h2>Student Profile</h2>
-      <UserProfileCard {...student} />
+    <div className="container mx-auto p-4">
+      <h2 className="text-2xl font-bold mb-4">Student Profile</h2>
+      <UserProfileCard /> {/* Simply rendering the component */}
     </div>
   );
 };
