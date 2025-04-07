@@ -1,5 +1,5 @@
 import React from "react";
-import "./upload.css"; // Imports existing CSS
+import '../assets/styles/upload.css'; // Imports existing CSS
 
 interface UploadButtonProps {
     onFileUpload?: (file: File) => void; // Allow parent components to handle file uploads
@@ -16,15 +16,17 @@ const UploadButton: React.FC<UploadButtonProps> = ({ onFileUpload }) => {
     };
 
     return (
+       
         <div className="upload-container">
-            <label htmlFor="file-upload" className="upload-button">
-                Upload File
+            <h1>BVCC Attendance Tracking Tool Homepage</h1>
+            <label htmlFor="file-upload" className="custom-file-upload">
+                Upload CSV File
             </label>
             <input 
                 id="file-upload" 
                 type="file" 
                 onChange={handleFileChange} 
-                style={{ display: "none" }} 
+                 
             />
         </div>
     );
