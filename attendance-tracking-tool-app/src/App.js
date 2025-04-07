@@ -1,6 +1,6 @@
-import logo from './logo.svg';
 import './App.css';
-import UploadButton from '/.components/UploadButtonComponent';
+import UploadButton from './components/UploadButtonComponent';
+
 
 function App() {
   return (
