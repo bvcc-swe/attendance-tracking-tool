@@ -17,6 +17,7 @@ db.serialize(() => {
       name TEXT NOT NULL,
       email TEXT NOT NULL UNIQUE,
       university TEXT,
+      track TEXT,
       attendance_count INTEGER DEFAULT 0,
       certificateEligible BOOLEAN DEFAULT 0
     )
