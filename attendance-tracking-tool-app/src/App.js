@@ -1,5 +1,6 @@
-import React from "react";
 import './App.css';
+import UploadButton from './components/UploadButtonComponent';
+import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import StudentProfilePage from "./components/StudentProfilePage.js";
 import StudentProfileButton from "./components/StudentProfileButton";
