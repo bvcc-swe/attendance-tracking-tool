@@ -9,6 +9,7 @@ function App() {
   return (
     <Router>
       <div>
+        <UploadButton />
         {/* the button used to navigate to the student profile page is rendered here */}
         <StudentProfileButton />
 
