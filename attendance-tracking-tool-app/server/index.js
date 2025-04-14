@@ -35,7 +35,12 @@ app.get('/users', async (req, res) => {
 });
 
 app.post('/users', async (req, res) => {
-  const { name, email, university, track, attendance_count } = req.body;
+  // Convert email (and other fields if desired) to lowercase
+  const name = req.body.name; // You may also choose to lowercase names if needed
+  const email = req.body.email.toLowerCase();
+  const university = req.body.university ? req.body.university.toLowerCase() : null;
+  const track = req.body.track ? req.body.track.toLowerCase() : null;
+  const attendance_count = req.body.attendance_count;
 
   if (!name || !email) {
     return res.status(400).json({ error: 'Missing required fields: name and email are required.' });
@@ -55,18 +60,10 @@ app.post('/users', async (req, res) => {
       INSERT INTO users (id, name, email, university, track, attendance_count, certificateEligible)
       VALUES ($1, $2, $3, $4, $5, $6, $7)
     `;
-    await db.query(insertQuery, [id, name, email, university, track || null, attendance_count || 0, false]);
+    await db.query(insertQuery, [id, name, email, university, track, attendance_count || 0, false]);
     res.status(201).json({
       message: 'User created successfully',
-      user: {
-        id,
-        name,
-        email,
-        university,
-        track: track || null,
-        attendance_count: attendance_count || 0,
-        certificateEligible: false
-      }
+      user: { id, name, email, university, track, attendance_count: attendance_count || 0, certificateEligible: false }
     });
   } catch (err) {
     console.error('Error inserting user:', err.message);
@@ -76,6 +73,7 @@ app.post('/users', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
 
 const PORT = process.env.PORT || 6060;
 app.listen(PORT, () => {
