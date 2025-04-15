@@ -1,5 +1,5 @@
 import React from "react";
-import "./upload.css"; // Imports existing CSS
+import '../assets/styles/upload.css'; // Imports existing CSS
 
 interface UploadButtonProps {
     onFileUpload?: (file: File) => void; // Allow parent components to handle file uploads
