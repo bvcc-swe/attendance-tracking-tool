@@ -1,41 +1,51 @@
-import React, { useState } from "react";
+import React from "react";
 import Papa from "papaparse";
+import UploadButton from "./UploadButtonComponent.tsx"; // adjust path as needed
 
 const CsvParser = () => {
-  const [students, setStudents] = useState([]);
+  // Function to send parsed data to backend
+  const storeStudents = async (studentsArray) => {
+    try {
+      const response = await fetch("http://localhost:3000/upload-csv", { //posts the parsed array to the back end
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ students: studentsArray }),
+      });
 
-  const handleFileUpload = (event) => {
-    const file = event.target.files[0];
+      if (response.ok) {
+        console.log("Data successfully sent to the backend!");
+      } else {
+        console.error("Error uploading data");
+      }
+    } catch (error) {
+      console.error("Error sending data:", error);
+    }
+  };
 
-    if (!file) return;
-
+  // This function is passed to UploadButton
+  const handleFileUpload = (file) => {
     Papa.parse(file, {
       complete: (result) => {
         const rows = result.data;
         const filteredData = rows.slice(1).map((row) => ({
-          id: row[0],        // Assuming first column is ID
-          name: row[1],      // Second column is the Student's Name
-          email: row[2],     // Third column is the student's Email
-          university: row[3] // Fourth column is University
+          name: row[1],
+          email: row[2].toLowerCase(),
+          university: row[3]?.toLowerCase() || "",
+          track: row[4]?.toLowerCase() || "",
+          attendance_count: parseInt(row[5], 10) || 1,
         }));
-        
-        setStudents(filteredData);
+
+        storeStudents(filteredData); // Send parsed data to backend
       },
-      header: false // Set to true if CSV has headers
+      header: false,
     });
   };
 
   return (
     <div>
-      <input type="file" accept=".csv" onChange={handleFileUpload} />
-      <h3>Parsed Data</h3>
-      <ul>
-        {students.map((student, index) => (
-          <li key={index}>
-            {student.id} - {student.name} - {student.email} - {student.university}
-          </li>
-        ))}
-      </ul>
+      <UploadButton onFileUpload={handleFileUpload} />
     </div>
   );
 };
