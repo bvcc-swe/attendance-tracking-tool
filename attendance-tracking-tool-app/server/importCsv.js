@@ -27,7 +27,7 @@ async function storeStudents(studentsArray) {
       // Check if user already exists by email (emails are already normalized to lowercase)
       const existing = await db.query('SELECT id, attendance_count FROM users WHERE email = $1', [student.email]);
       if (existing.rows.length > 0) {
-        // If user exists, update the attendance count
+        // If exists, update attendance count
         await db.query('UPDATE users SET attendance_count = attendance_count + $1 WHERE email = $2', [student.attendance_count, student.email]);
         console.log(`Updated user: ${student.name} (${student.email}) with +${student.attendance_count} attendance.`);
       } else {
@@ -47,14 +47,14 @@ async function storeStudents(studentsArray) {
   }
 }
 
-// Main function to parse CSV into an array and store the data
+// Main function to parse CSV into an array and then store the data
 async function processCSV() {
   let rowCount = 0;
   let parsedStudents = []; // Array to hold all parsed student objects
 
   const stream = fs.createReadStream(csvFilePath).pipe(csv());
 
-  // Parse each row and push into the array
+  // Parse each row and accumulate into the array
   for await (const row of stream) {
     rowCount++;
     if (!row.name || !row.email) {
@@ -62,7 +62,7 @@ async function processCSV() {
       continue;
     }
 
-    // Create a student object with normalized data
+    // Normalize fields: convert email, university, and track to lowercase
     const student = {
       name: row.name,
       email: row.email.toLowerCase(),
@@ -77,11 +77,15 @@ async function processCSV() {
   console.log(`CSV file parsed successfully! Total rows processed: ${rowCount}`);
   console.log("Parsed data array:", parsedStudents);
 
-  // Now pass the array of student objects to the function that stores them in the database
+  // Now pass the parsed array to the storeStudents function
   await storeStudents(parsedStudents);
 }
 
-// Run the process
-processCSV().catch(err => {
-  console.error('Error processing CSV file:', err.message);
-});
+// If importCsv.js is run directly, call processCSV(); otherwise, export storeStudents.
+if (require.main === module) {
+  processCSV().catch(err => {
+    console.error('Error processing CSV file:', err.message);
+  });
+}
+
+module.exports = { storeStudents };
