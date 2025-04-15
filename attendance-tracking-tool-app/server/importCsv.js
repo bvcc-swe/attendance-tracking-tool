@@ -19,67 +19,69 @@ async function getNextId() {
   }
 }
 
-async function processCSV() {
-  let rowCount = 0;
-  let errorReport = [];
+// Function to store the parsed student data into the database using the array of objects
+async function storeStudents(studentsArray) {
   let nextId = await getNextId();
-
-  // Create a stream to read and parse the CSV file
-  const stream = fs.createReadStream(csvFilePath).pipe(csv());
-
-  // Process each row sequentially using async iteration
-  for await (const row of stream) {
-    rowCount++;
-    if (!row.name || !row.email) {
-      console.warn(`Row ${rowCount}: Missing required fields. Skipping row.`);
-      errorReport.push(`Row ${rowCount}: Missing required fields.`);
-      continue;
-    }
-
-    // Convert inputs to lowercase to avoid casing issues
-    const name = row.name;
-    const email = row.email.toLowerCase();
-    const university = row.university ? row.university.toLowerCase() : null;
-    const track = row.track ? row.track.toLowerCase() : null;
-    const additionalAttendance = parseInt(row.attendance_count, 10) || 1;
-
+  for (const student of studentsArray) {
     try {
-      // Check if user already exists by email
-      const existing = await db.query('SELECT id, attendance_count FROM users WHERE email = $1', [email]);
+      // Check if user already exists by email (emails are already normalized to lowercase)
+      const existing = await db.query('SELECT id, attendance_count FROM users WHERE email = $1', [student.email]);
       if (existing.rows.length > 0) {
-        // If exists, update attendance count
-        await db.query('UPDATE users SET attendance_count = attendance_count + $1 WHERE email = $2', [additionalAttendance, email]);
-        console.log(`Updated user: ${name} (${email}) with +${additionalAttendance} attendance.`);
+        // If user exists, update the attendance count
+        await db.query('UPDATE users SET attendance_count = attendance_count + $1 WHERE email = $2', [student.attendance_count, student.email]);
+        console.log(`Updated user: ${student.name} (${student.email}) with +${student.attendance_count} attendance.`);
       } else {
-        // If not, insert new record with sequential ID
+        // Insert a new record with the next sequential ID
         const newId = `USR-${nextId}`;
         const insertQuery = `
           INSERT INTO users (id, name, email, university, track, attendance_count, certificateEligible)
           VALUES ($1, $2, $3, $4, $5, $6, $7)
         `;
-        await db.query(insertQuery, [newId, name, email, university, track || null, additionalAttendance, false]);
-        console.log(`Inserted new user: ${name} (${email}) with ID: ${newId}`);
-        nextId++; // Increment nextId for the next new record only
+        await db.query(insertQuery, [newId, student.name, student.email, student.university, student.track, student.attendance_count, false]);
+        console.log(`Inserted new user: ${student.name} (${student.email}) with ID: ${newId}`);
+        nextId++;
       }
     } catch (err) {
-      console.error(`Error processing row ${rowCount} (email: ${email}): ${err.message}`);
-      errorReport.push(`Row ${rowCount} (${email}): ${err.message}`);
-    }
-  }
-
-  if (rowCount === 0) {
-    console.error('Error: CSV file is empty or no valid rows found.');
-  } else {
-    console.log(`CSV file successfully processed! Total rows processed: ${rowCount}`);
-    if (errorReport.length > 0) {
-      console.warn('Some rows encountered errors:');
-      errorReport.forEach(msg => console.warn(msg));
-    } else {
-      console.log('All rows processed successfully.');
+      console.error(`Error processing student (${student.email}): ${err.message}`);
     }
   }
 }
 
+// Main function to parse CSV into an array and store the data
+async function processCSV() {
+  let rowCount = 0;
+  let parsedStudents = []; // Array to hold all parsed student objects
+
+  const stream = fs.createReadStream(csvFilePath).pipe(csv());
+
+  // Parse each row and push into the array
+  for await (const row of stream) {
+    rowCount++;
+    if (!row.name || !row.email) {
+      console.warn(`Row ${rowCount}: Missing required fields. Skipping row.`);
+      continue;
+    }
+
+    // Create a student object with normalized data
+    const student = {
+      name: row.name,
+      email: row.email.toLowerCase(),
+      university: row.university ? row.university.toLowerCase() : null,
+      track: row.track ? row.track.toLowerCase() : null,
+      attendance_count: parseInt(row.attendance_count, 10) || 1
+    };
+
+    parsedStudents.push(student);
+  }
+
+  console.log(`CSV file parsed successfully! Total rows processed: ${rowCount}`);
+  console.log("Parsed data array:", parsedStudents);
+
+  // Now pass the array of student objects to the function that stores them in the database
+  await storeStudents(parsedStudents);
+}
+
+// Run the process
 processCSV().catch(err => {
   console.error('Error processing CSV file:', err.message);
 });
