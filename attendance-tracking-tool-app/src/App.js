@@ -23,3 +23,4 @@ function App() {
 }
 
 export default App;
+//This is exactly how the homepage should look like. Contain a button to upload a csv file and another to view student profiles
