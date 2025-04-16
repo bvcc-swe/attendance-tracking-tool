@@ -5,6 +5,9 @@ const db = require('./db'); // PostgreSQL pool
 const { getStudentViews } = require('./queries');
 require('dotenv').config();
 
+const { storeStudents } = require('./importCsv');
+console.log("storeStudents:", storeStudents);
+
 const app = express();
 
 app.use(cors());
@@ -73,6 +76,23 @@ app.post('/users', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+app.post('/upload-csv', async (req, res) => {
+  try {
+    const students = req.body.students; // Expecting the front end to send an object { students: [...] }
+    if (!Array.isArray(students)) {
+      return res.status(400).send("Invalid data: 'students' must be an array.");
+    }
+
+    // Call the function that processes and stores the array in the database
+    await storeStudents(students);
+    res.status(200).send("Data stored successfully");
+  } catch (error) {
+    console.error("Error in /upload-csv:", error.message);
+    res.status(500).send("Error storing data: " + error.message);
+  }
+});
+
 
 
 const PORT = process.env.PORT || 6060;
