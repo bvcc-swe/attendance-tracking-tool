@@ -53,7 +53,7 @@ const UploadButton: React.FC<UploadButtonProps> = ({ onFileUpload }) => {
         onChange={handleFileChange}
       />
     </div>
-  );c
+  );
 };
 
 export default UploadButton;
