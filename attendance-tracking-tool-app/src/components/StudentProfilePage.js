@@ -65,7 +65,7 @@ const StudentProfile = () => {
     <div style={{ textAlign: "center", margin: "20px" }}>
       <h2>Student Profiles</h2>
 
-      {/* Search Bar */}
+      {/* Search Bar Styling */}
       <input
         type="text"
         placeholder="Search by school or track..."
@@ -97,10 +97,20 @@ const StudentProfile = () => {
         <option value="attendance-low-high">Attendance Count (Low to High)</option>
       </select>
 
-      {/* Render Sorted Students */}
+      {/* Render Sorted Students on the page */}
       <div>
         {sortedStudents.map((student, index) => (
-          <UserProfileCard key={index} {...student} />
+          <UserProfileCard
+          key={index}
+          name={student.name}
+          email={student.email}
+          university={student.university}
+          major={student.major}
+          classification={student.classification}
+          track={student.track}
+          attendanceCount={student.attendanceCount}
+          isEligibleForCertificate={student.attendanceCount >= 7} /> //This determines wether or not they are elligible for the certificate based on
+          //if hteyhave an attendance count greater than 7 since the program is a 10 week long program
         ))}
       </div>
     </div>
