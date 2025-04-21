@@ -25,3 +25,4 @@ yarn-error.log*
 
 /server/database.db
 /server/node_modules
+.vercel
