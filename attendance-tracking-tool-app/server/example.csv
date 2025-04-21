@@ -1,4 +1,5 @@
-name,email,university,attendance_count
-Amir Fisher,amir@example.com,Atlanta University Center,5
-Stephanie Brown,steph.brown@example.com,AUC,3
-Emmanuel Ray,emmanuel.ray@example.com,FAMU,2
+name,email,university,track,attendance_count
+Key Fisher,Key@example.com,Atlanta University Center,venture capital,1
+Stephanie Brown,stephanie.brown@example.com,AUC,software engineering,1
+Emmanuel Ray,emmanuell.ray@example.com,HOWARD,product management,1
+Marcus Rashford,Marcus.RASHHHH@manutd.com,UMD,software engineering,1
