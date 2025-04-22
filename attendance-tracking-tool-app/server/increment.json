@@ -7,7 +7,16 @@
         "track": "software engineering",
         "major": "computer science",
         "classification": "junior",
-        "attendance_count": 2         
+        "attendance_count": 2
+      },
+      {
+        "name": "Cristiano R",
+        "email": "cristiano@ronaldo.com",
+        "university": "famu",
+        "track": "software engineering",
+        "major": "computer science",
+        "classification": "junior",
+        "attendance_count": 3
       }
     ]
   }
