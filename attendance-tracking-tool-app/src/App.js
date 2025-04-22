@@ -10,17 +10,18 @@ function AppContent() {
   const location = useLocation();
 
   const isOnStudentProfilePage = location.pathname === "/student-profile";
+  const [parsedData, setParsedData] = React.useState([]); // ⬅️ Holds uploaded students
 
   return (
     <div>
       {/* Always show UploadButton */}
-      <UploadButton />
+      <UploadButton  setParsedData={setParsedData}/>
 
       {/* Only show StudentProfileButton if not on the profile page */}
       {!isOnStudentProfilePage && <StudentProfileButton />}
 
       <Routes>
-        <Route path="/student-profile" element={<StudentProfilePage />} />
+        <Route path="/student-profile" element={<StudentProfilePage students={parsedData} />} />
       </Routes>
     </div>
   );
