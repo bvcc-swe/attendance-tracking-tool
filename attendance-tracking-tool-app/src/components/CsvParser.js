@@ -30,11 +30,14 @@ const CsvParser = () => {
       complete: (result) => {
         const rows = result.data;
         const filteredData = rows.slice(1).map((row) => ({
-          name: row[1],
-          email: row[2].toLowerCase(),
-          university: row[3]?.toLowerCase() || "",
-          track: row[4]?.toLowerCase() || "",
-          attendance_count: parseInt(row[5], 10) || 1,
+          name: row[0],              // Column A
+          email: row[1],             // Column B
+          university: row[2],        // Column C
+          major: row[3],             // Column D
+          classification: row[4],    // Column E
+          track: row[5],             // Column F
+          attendanceCount: parseInt(row[6], 10), // Column G
+          isEligibleForCertificate: parseInt(row[6], 10) >= 7 //converts attendanceCount to a number using parseInt() (CSV parsing defaults to strings).
         }));
 
         storeStudents(filteredData); // Send parsed data to backend
