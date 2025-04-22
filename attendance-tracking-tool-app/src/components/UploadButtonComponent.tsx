@@ -1,8 +1,9 @@
 import React from "react";
-import "../assets/styles/upload.css"; // Imports existing CSS
+import Papa, { ParseResult } from "papaparse";
+import "../assets/styles/upload.css";
 
 interface UploadButtonProps {
-  onFileUpload?: (file: File) => void; // Optional callback for parent components
+  onFileUpload?: (file: File) => void;
 }
 
 const UploadButton: React.FC<UploadButtonProps> = ({ onFileUpload }) => {
@@ -10,33 +11,39 @@ const UploadButton: React.FC<UploadButtonProps> = ({ onFileUpload }) => {
     if (event.target.files && event.target.files.length > 0) {
       const file = event.target.files[0];
 
-      // Optional callback to inform parent
       if (onFileUpload) {
         onFileUpload(file);
       }
 
-      // Prepare form data for backend
-      const formData = new FormData();
-      formData.append("csvFile", file); //labels file as csvFile
+      Papa.parse(file, {
+        header: true,
+        skipEmptyLines: true,
+        complete: async function (results: ParseResult<any>) {
+          const parsedData = results.data;
+          console.log("Parsed data being sent:", parsedData);  //displays the parsed
+          try {
+            
+            const response = await fetch("http://localhost:6060/upload-csv", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ students: parsedData }),
+            });
 
-      //frontend pointing to backend
-      try {
-        const response = await fetch("http://localhost:6060", { //server that the backend is working on
-          method: "POST",
-          body: formData,
-        });
+            if (!response.ok) {
+              throw new Error("Failed to upload and parse CSV data.");
+            }
 
-        if (!response.ok) {
-          throw new Error("Failed to upload and parse CSV file.");
-        }
-
-        const data = await response.json();
-        console.log("Server response:", data);
-        alert("CSV uploaded and processed successfully!");
-      } catch (error: any) {
-        console.error("Error uploading file:", error.message);
-        alert("There was an error uploading the file.");
-      }
+            const data = await response.text();
+            console.log("Server response:", data);
+            alert("CSV uploaded and processed successfully!");
+          } catch (error: any) {
+            console.error("Error uploading parsed data:", error.message);
+            alert("There was an error uploading the parsed data.");
+          }
+        },
+      });
     }
   };
 
