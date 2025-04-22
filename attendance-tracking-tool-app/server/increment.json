@@ -1,0 +1,14 @@
+{
+    "students": [
+      {
+        "name": "Alice Example",
+        "email": "alice@example.com",
+        "university": "famu",
+        "track": "software engineering",
+        "major": "computer science",
+        "classification": "junior",
+        "attendance_count": 2         
+      }
+    ]
+  }
+  
