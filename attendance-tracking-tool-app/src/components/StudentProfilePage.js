@@ -98,7 +98,7 @@ const StudentProfile = () => {
       </select>
 
       {/* Render Sorted Students on the page */}
-      <div>
+      <div className="profile-container">
         {sortedStudents.map((student, index) => (
           <UserProfileCard
           key={index}
