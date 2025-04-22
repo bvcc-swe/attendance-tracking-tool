@@ -98,7 +98,7 @@ const StudentProfile = () => {
       </select>
 
       {/* Render Sorted Students on the page */}
-      <div>
+      <div className="profile-container">
         {sortedStudents.map((student, index) => (
           <UserProfileCard
           key={index}
@@ -108,8 +108,10 @@ const StudentProfile = () => {
           major={student.major}
           classification={student.classification}
           track={student.track}
+
           attendanceCount={student.attendance_count}
           isEligibleForCertificate={student.attendance_count >= 7} /> //This determines wether or not they are elligible for the certificate based on
+
           //if hteyhave an attendance count greater than 7 since the program is a 10 week long program
         ))}
       </div>
