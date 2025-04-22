@@ -34,10 +34,10 @@ async function storeStudents(studentsArray) {
         // Insert a new record with the next sequential ID
         const newId = `USR-${nextId}`;
         const insertQuery = `
-          INSERT INTO users (id, name, email, university, track, attendance_count, certificateEligible)
-          VALUES ($1, $2, $3, $4, $5, $6, $7)
+          INSERT INTO users (id, name, email, university, track, major, classification, attendance_count, certificateEligible)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
         `;
-        await db.query(insertQuery, [newId, student.name, student.email, student.university, student.track, student.attendance_count, false]);
+        await db.query(insertQuery, [newId, student.name, student.email, student.university, student.track, student.major, student.classification, student.attendance_count, false]);
         console.log(`Inserted new user: ${student.name} (${student.email}) with ID: ${newId}`);
         nextId++;
       }
@@ -68,6 +68,8 @@ async function processCSV() {
       email: row.email.toLowerCase(),
       university: row.university ? row.university.toLowerCase() : null,
       track: row.track ? row.track.toLowerCase() : null,
+      major: row.major ? row.major.toLowerCase() : null, 
+      classification: row.classification ? row.classification.toLowerCase() : null, 
       attendance_count: parseInt(row.attendance_count, 10) || 1
     };
 

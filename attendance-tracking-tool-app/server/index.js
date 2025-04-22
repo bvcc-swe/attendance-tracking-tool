@@ -43,6 +43,8 @@ app.post('/users', async (req, res) => {
   const email = req.body.email.toLowerCase();
   const university = req.body.university ? req.body.university.toLowerCase() : null;
   const track = req.body.track ? req.body.track.toLowerCase() : null;
+  const major = req.body.major ? req.body.major.toLowerCase() : null;
+  const classification = req.body.classification ? req.body.classification.toLowerCase() : null;
   const attendance_count = req.body.attendance_count;
 
   if (!name || !email) {
@@ -60,13 +62,13 @@ app.post('/users', async (req, res) => {
     const id = `USR-${newIdNumber}`;
 
     const insertQuery = `
-      INSERT INTO users (id, name, email, university, track, attendance_count, certificateEligible)
-      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      INSERT INTO users (id, name, email, university, track, major, classification, attendance_count, certificateEligible)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
     `;
-    await db.query(insertQuery, [id, name, email, university, track, attendance_count || 0, false]);
+    await db.query(insertQuery, [id, name, email, university, track, major, classification, attendance_count || 0, false]);
     res.status(201).json({
       message: 'User created successfully',
-      user: { id, name, email, university, track, attendance_count: attendance_count || 0, certificateEligible: false }
+      user: { id, name, email, university, track, major, classification, attendance_count: attendance_count || 0, certificateEligible: false }
     });
   } catch (err) {
     console.error('Error inserting user:', err.message);
