@@ -1,12 +1,16 @@
-import React from "react";
+import React, { useState } from "react";
 import Papa from "papaparse";
-import UploadButton from "./UploadButtonComponent.tsx"; // adjust path as needed
+import UserProfileCard from "./UserProfileCard";
+import UploadButton from "./UploadButtonComponent";
 
 const CsvParser = () => {
-  // Function to send parsed data to backend
-  const storeStudents = async (studentsArray) => {
+  const [students, setStudents] = useState([]);
+  const [showProfiles, setShowProfiles] = useState(false);
+
+  // Send parsed CSV data to the backend
+  const uploadToBackend = async (studentsArray) => {
     try {
-      const response = await fetch("http://localhost:3000/upload-csv", { //posts the parsed array to the back end
+      const response = await fetch("http://localhost:3000/upload-csv", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -24,28 +28,53 @@ const CsvParser = () => {
     }
   };
 
-  // This function is passed to UploadButton
+  // Handles CSV upload and parsing
   const handleFileUpload = (file) => {
     Papa.parse(file, {
       complete: (result) => {
         const rows = result.data;
         const filteredData = rows.slice(1).map((row) => ({
-          name: row[1],
-          email: row[2].toLowerCase(),
-          university: row[3]?.toLowerCase() || "",
-          track: row[4]?.toLowerCase() || "",
-          attendance_count: parseInt(row[5], 10) || 1,
+          name: row[0],
+          email: row[1],
+          university: row[2],
+          major: row[3],
+          classification: row[4],
+          track: row[5],
+          attendance_count: parseInt(row[6], 10),
+          certificateEligibility: parseInt(row[6], 10) >= 7
         }));
-
-        storeStudents(filteredData); // Send parsed data to backend
+        setStudents(filteredData);
+        uploadToBackend(filteredData); // Correct function call
       },
       header: false,
     });
   };
 
+  const toggleProfiles = () => {
+    setShowProfiles(!showProfiles);
+  };
+
   return (
     <div>
       <UploadButton onFileUpload={handleFileUpload} />
+      <button onClick={toggleProfiles}>
+        {showProfiles ? "Hide Profiles" : "Show Profiles"}
+      </button>
+      {showProfiles && (
+        <div>
+          {students.map((student, index) => (
+            <UserProfileCard
+              key={index}
+              name={student.name}
+              email={student.email}
+              university={student.university}
+              track={student.track}
+              attendance_count={student.attendance_count}
+              certificateEligibility={student.certificateEligibility}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 };
