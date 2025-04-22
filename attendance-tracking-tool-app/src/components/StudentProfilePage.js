@@ -1,41 +1,6 @@
 import React, { useState } from "react";
 import UserProfileCard from "./UserProfileCard"; // Removed .tsx
-
-const StudentProfile = () => {  
-  // Sample student data
-  const students = [
-    {
-      name: "Stephanie",
-      email: "steph@example.com",
-      university: "Morgan State University",
-      major: "Computer Science",
-      classification: "Freshman",
-      track: "Software Engineering",
-      attendance_count: 5,
-      certificateEligibility: "Eligible",
-    },
-    {
-      name: "David",
-      email: "david@example.com",
-      university: "Howard University",
-      major: "Cybersecurity",
-      classification: "Sophomore",
-      track: "Network Security",
-      attendance_count: 8,
-      certificateEligibility: "Eligible",
-    },
-    {
-      name: "Olivia",
-      email: "olivia@example.com",
-      university: "North Carolina A&T University", // Fixed spacing
-      major: "Data Science", // Fixed typo
-      classification: "Junior",
-      track: "Software Engineering",
-      attendance_count: 10,
-      certificateEligibility: "Eligible",
-    }
-  ];
-
+const StudentProfile = ({ students }) => {  
   // State for search input
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -97,6 +62,7 @@ const StudentProfile = () => {
         <option value="attendance-low-high">Attendance Count (Low to High)</option>
       </select>
 
+
       {/* Render Sorted Students on the page */}
       <div className="profile-container">
         {sortedStudents.map((student, index) => (
@@ -112,7 +78,7 @@ const StudentProfile = () => {
           attendanceCount={student.attendance_count}
           isEligibleForCertificate={student.attendance_count >= 7} /> //This determines wether or not they are elligible for the certificate based on
 
-          //if hteyhave an attendance count greater than 7 since the program is a 10 week long program
+          //if they have an attendance count greater than 7 since the program is a 10 week long program
         ))}
       </div>
     </div>
