@@ -28,7 +28,7 @@ const CsvParser = () => {
     }
   };
 
-  // Handles CSV upload and parsing
+  // Handles CSV upload and parsing (receives the parsed CSV data from the UploadButton component)
   const handleFileUpload = (file) => {
     Papa.parse(file, {
       complete: (result) => {
@@ -43,6 +43,7 @@ const CsvParser = () => {
           attendance_count: parseInt(row[6], 10),
           certificateEligibility: parseInt(row[6], 10) >= 7
         }));
+        console.log(filteredData)
         setStudents(filteredData);
         uploadToBackend(filteredData); // Correct function call
       },
