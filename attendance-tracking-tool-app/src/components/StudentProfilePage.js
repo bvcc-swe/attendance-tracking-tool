@@ -11,7 +11,7 @@ const StudentProfile = () => {
       major: "Computer Science",
       classification: "Freshman",
       track: "Software Engineering",
-      attendanceCount: 5,
+      attendance_count: 5,
       certificateEligibility: "Eligible",
     },
     {
@@ -21,7 +21,7 @@ const StudentProfile = () => {
       major: "Cybersecurity",
       classification: "Sophomore",
       track: "Network Security",
-      attendanceCount: 8,
+      attendance_count: 8,
       certificateEligibility: "Eligible",
     },
     {
@@ -31,7 +31,7 @@ const StudentProfile = () => {
       major: "Data Science", // Fixed typo
       classification: "Junior",
       track: "Software Engineering",
-      attendanceCount: 10,
+      attendance_count: 10,
       certificateEligibility: "Eligible",
     }
   ];
@@ -56,8 +56,8 @@ const StudentProfile = () => {
     .sort((a, b) => {
       if (sortOption === "school") return a.university.localeCompare(b.university);
       if (sortOption === "track") return a.track.localeCompare(b.track);
-      if (sortOption === "attendance-high-low") return b.attendanceCount - a.attendanceCount;
-      if (sortOption === "attendance-low-high") return a.attendanceCount - b.attendanceCount;
+      if (sortOption === "attendance-high-low") return b.attendance_count - a.attendance_count;
+      if (sortOption === "attendance-low-high") return a.attendance_count - b.attendance_count;
       return 0;
     });
 
@@ -108,8 +108,10 @@ const StudentProfile = () => {
           major={student.major}
           classification={student.classification}
           track={student.track}
-          attendanceCount={student.attendanceCount}
-          isEligibleForCertificate={student.attendanceCount >= 7} /> //This determines wether or not they are elligible for the certificate based on
+
+          attendanceCount={student.attendance_count}
+          isEligibleForCertificate={student.attendance_count >= 7} /> //This determines wether or not they are elligible for the certificate based on
+
           //if hteyhave an attendance count greater than 7 since the program is a 10 week long program
         ))}
       </div>
