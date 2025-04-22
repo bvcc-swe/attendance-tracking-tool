@@ -1,10 +1,15 @@
-import React from "react";
+import React, { useState } from "react";
 import Papa from "papaparse";
-import UploadButton from "./UploadButtonComponent.tsx"; // adjust path as needed
+import UserProfileCard from "./UserProfileCard";
+import UploadButton from "./UploadButtonComponent";
 
 const CsvParser = () => {
+  // Define students state to store the parsed data
+  const [students, setStudents] = useState([]);
+  const [showProfiles, setShowProfiles] = useState(false);
+
   // Function to send parsed data to backend
-  const storeStudents = async (studentsArray) => {
+  const storeStudents = async (studentsArray) => {  //store students is the backend async function in importCSV.js that handles storing the CSV data
     try {
       const response = await fetch("http://localhost:3000/upload-csv", { //posts the parsed array to the back end
         method: "POST",
@@ -36,19 +41,41 @@ const CsvParser = () => {
           major: row[3],             // Column D
           classification: row[4],    // Column E
           track: row[5],             // Column F
-          attendanceCount: parseInt(row[6], 10), // Column G
+          attendance_count: parseInt(row[6], 10), // Column G
           isEligibleForCertificate: parseInt(row[6], 10) >= 7 //converts attendanceCount to a number using parseInt() (CSV parsing defaults to strings).
         }));
-
+        setStudents(filteredData); // Store parsed data in state
         storeStudents(filteredData); // Send parsed data to backend
       },
       header: false,
     });
   };
+   // Toggle the display of profiles
+   const toggleProfiles = () => {
+    setShowProfiles(!showProfiles);
+  };
 
   return (
     <div>
       <UploadButton onFileUpload={handleFileUpload} />
+      <button onClick={toggleProfiles}>
+        {showProfiles ? "Hide Profiles" : "Show Profiles"}
+      </button>
+      {showProfiles && (
+        <div>
+          {students.map((student, index) => (
+            <UserProfileCard
+              key={index}
+              name={student.name}
+              email={student.email}
+              university={student.university}
+              track={student.track}
+              attendance_count={student.attendance_count}
+              certificateEligibility={student.certificateEligibility}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 };
