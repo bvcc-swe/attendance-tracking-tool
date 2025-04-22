@@ -24,6 +24,7 @@ function App() {
         <Route path="/student-profile" element={<StudentProfilePage />} />
       </Routes>
     </Router>
+
   );
 }
 
