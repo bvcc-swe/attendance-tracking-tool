@@ -1,17 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, } from "react";
 import UserProfileCard from "./UserProfileCard"; // Removed .tsx
-const StudentProfile = ({ students }) => {  
+
+const StudentProfilePage = ({ students = [] }) => {  
   // State for search input
   const [searchQuery, setSearchQuery] = useState("");
-
   // State for sorting option
   const [sortOption, setSortOption] = useState("");
-
   // Function to handle search input changes
   const handleSearch = (event) => {
     setSearchQuery(event.target.value);
   };
-
+ 
+  console.log("Received students:", students); //display student array in console if received
   // Filter and sort students
   const sortedStudents = [...students]
     .filter((student) =>
@@ -85,4 +85,4 @@ const StudentProfile = ({ students }) => {
   );
 };
 
-export default StudentProfile;
+export default StudentProfilePage;

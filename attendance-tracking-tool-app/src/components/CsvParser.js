@@ -19,6 +19,7 @@ const CsvParser = () => {
       });
 
       if (response.ok) {
+        console.log(response.status) 
         console.log("Data successfully sent to the backend!");
       } else {
         console.error("Error uploading data");
@@ -45,7 +46,7 @@ const CsvParser = () => {
         }));
         console.log(filteredData)
         setStudents(filteredData);
-        uploadToBackend(filteredData); // Correct function call
+        uploadToBackend(students); // Correct function call
       },
       header: false,
     });
