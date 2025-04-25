@@ -35,6 +35,7 @@ const UploadButton: React.FC<UploadButtonProps> = ({ onFileUpload }) => {
               throw new Error("Failed to upload and parse CSV data.");
             }
 
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const data = await response.text();
             console.log("response status", response.status)
             console.log("Server response:", response.body);

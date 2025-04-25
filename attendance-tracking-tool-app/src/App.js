@@ -8,11 +8,11 @@ import StudentProfileButton from './components/StudentProfileButton';
 function AppContent() {
   const location = useLocation();
   const isOnStudentProfilePage = location.pathname === "/student-profile";
-  const [parsedData, setParsedData] = useState([]); // Holds uploaded students
+  const [ setParsedData] = useState([]); // Holds uploaded students
   const [students, setStudents] = useState([]);
 
   useEffect(() => {
-    fetch("http://localhost:6060/student-views") // replace with endpoint
+    fetch("http://localhost:6060/users") // replace with endpoint 
       .then((res) => res.json())
       .then((data) => {
         console.log("Fetched students from backend:", data);
@@ -32,7 +32,7 @@ function AppContent() {
       <Routes>
         <Route 
           path="/student-profile" 
-          element={<StudentProfilePage students={parsedData.length > 0 ? parsedData : students} />} 
+          element={<StudentProfilePage students={students} />}  //renders the user profile cards for each student on the student profile page
         />
       </Routes>
     </div>
