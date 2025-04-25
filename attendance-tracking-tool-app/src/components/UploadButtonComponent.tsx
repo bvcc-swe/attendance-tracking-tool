@@ -49,7 +49,7 @@ const UploadButton: React.FC<UploadButtonProps> = ({ onFileUpload }) => {
 
   return (
     <div className="upload-container">
-      <h1>BVCC Attendance Tracking Tool Homepage</h1>
+      <h1>BVCC Attendance Tracking Tool</h1>
       <label htmlFor="file-upload" className="custom-file-upload">
         Upload CSV File
       </label>
