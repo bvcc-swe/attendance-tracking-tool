@@ -15,10 +15,10 @@ function StudentProfileButton() {
         cursor: 'pointer',
         marginTop: '10px',
         marginBottom: '20px',
-        marginLeft: '20px',
+        marginLeft: '100px',
         position: 'absolute',   // Set position
-        bottom: '80px',         // Position at the bottom
-        left: '45%',
+        top: '100px',         // Position the button at the top of the page
+        left: '25%',
         
     };
   
