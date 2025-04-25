@@ -8,13 +8,17 @@
     flex-wrap: wrap;
     justify-content: left; /* or space-between, start, etc. */
     gap: 20px;
-    margin-top: 15px;
+    margin-top: 5px;
   }
 .custom-file-upload {
     display: inline-block;
     padding: 10px 20px;
     background-color: #28a745;
     color: white;
+    margin-left: 100px;
+    position: absolute;
+    top: 100px;        /* Position the button at the top of the page */
+    left: 46%;
     border-radius: 5px;
     cursor: pointer;
 }
