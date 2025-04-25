@@ -13,10 +13,10 @@ function AppContent() {
 
   return (
     <div>
-      {/* Always show UploadButton */}
-      <UploadButton />
+      {/* Only show UploadCSVButton if the user is not on student profiles page */}
+      { !isOnStudentProfilePage && <UploadButton />}
 
-      {/* Only show StudentProfileButton if not on the profile page */}
+      {/* Only show StudentProfileButton if the user is not on the student profiles page */}
       {!isOnStudentProfilePage && <StudentProfileButton />}
 
       <Routes>
