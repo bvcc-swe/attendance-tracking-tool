@@ -1,8 +1,8 @@
 1.  **Make sure you have the .env file with the Database Connection string**
     
-
+```
 DATABASE\_URL=DatabaseConnectionString(Neon)
-
+```
 2.   **Run the backend locally**
     
 
@@ -24,16 +24,16 @@ Users table created or verified.
     
 
 Run:
-
+```
 curl http://localhost:6060/
-
+```
 Should see:
-
+```
 'Hello from the server!'
-
+```
 1.   **Insert one student manually**
     
-
+```
 curl -X POST http://localhost:6060/users \\
 
      -H "Content-Type: application/json" \\
@@ -55,9 +55,9 @@ curl -X POST http://localhost:6060/users \\
            "attendance\_count": 3
 
          }'
-
+```
 ### **4.2 Retrieve all students**
-
+```
 curl http://localhost:6060/users | jq
-
-_**(In a different terminal you can run node testQueries.js, to see the grouped versions of all the students as well.)**_
+```
+_**(In a different terminal you can run node ``` testQueries.js ```, to see the grouped versions of all the students as well.)**_
