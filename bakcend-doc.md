@@ -9,13 +9,13 @@ DATABASE\_URL=DatabaseConnectionString(Neon)
 \# from server/
 
 RUN:
-
+```
 node index.js
-
+```
 YOU SHOULD SEE THIS:
-
+```
 Server listening on http://localhost:6060
-
+```
 Connected to PostgreSQL. Server time: 
 
 Users table created or verified.
