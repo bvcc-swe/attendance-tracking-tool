@@ -1,93 +1,119 @@
-// importCsv.js
-const fs = require('fs');
-const csv = require('csv-parser');
+// server/importCsv.js
+const fs   = require('fs');
+const csv  = require('csv-parser');
 const path = require('path');
-const db = require('./db'); // PostgreSQL pool
+const db   = require('./db');        // ← PostgreSQL pool
 require('dotenv').config();
 
+/* If you still want to test with a local CSV, keep this path.
+   It is NOT used when the front-end POSTs /upload-csv.          */
 const csvFilePath = path.join(__dirname, 'example.csv');
 
-// Async function to get the next sequential ID
+/* ───────────────── helpers ───────────────── */
 async function getNextId() {
   try {
-    const res = await db.query("SELECT MAX(CAST(SUBSTRING(id FROM 5) AS INTEGER)) as maxId FROM users");
-    const maxId = res.rows[0].maxid;
-    return maxId ? maxId + 1 : 10000;
-  } catch (err) {
-    console.error("Error fetching max ID:", err.message);
+    const { rows } = await db.query(
+      'SELECT MAX(CAST(SUBSTRING(id FROM 5) AS INTEGER)) AS max FROM users'
+    );
+    return rows[0].max ? rows[0].max + 1 : 10000;
+  } catch (e) {
+    console.error('Error fetching max ID:', e.message);
     return 10000;
   }
 }
 
-// Function to store the parsed student data into the database using the array of objects
-async function storeStudents(studentsArray) {
+/* ───────────────── core routine ───────────────── */
+async function storeStudents(students) {
   let nextId = await getNextId();
-  for (const student of studentsArray) {
-    try {
-      // Check if user already exists by email (emails are already normalized to lowercase)
-      const existing = await db.query('SELECT id, attendance_count FROM users WHERE email = $1', [student.email]);
-      if (existing.rows.length > 0) {
-        // If exists, update attendance count
-        await db.query('UPDATE users SET attendance_count = attendance_count + $1 WHERE email = $2', [student.attendance_count, student.email]);
-        console.log(`Updated user: ${student.name} (${student.email}) with +${student.attendance_count} attendance.`);
-      } else {
-        // Insert a new record with the next sequential ID
-        const newId = `USR-${nextId}`;
-        const insertQuery = `
-          INSERT INTO users (id, name, email, university, track, major, classification, attendance_count, certificateEligible)
-          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-        `;
-        await db.query(insertQuery, [newId, student.name, student.email, student.university, student.track, student.major, student.classification, student.attendance_count, false]);
-        console.log(`Inserted new user: ${student.name} (${student.email}) with ID: ${newId}`);
-        nextId++;
-      }
-    } catch (err) {
-      console.error(`Error processing student (${student.email}): ${err.message}`);
-    }
-  }
-}
 
-// Main function to parse CSV into an array and then store the data
-async function processCSV() {
-  let rowCount = 0;
-  let parsedStudents = []; // Array to hold all parsed student objects
+  for (const raw of students) {
+    /* ── tolerate different header cases ── */
+    const name  =
+      raw.name  ?? raw.Name  ?? raw.fullName ?? raw.FullName ?? null;
+    const email =
+      (raw.email ?? raw.Email ?? '').toLowerCase();
 
-  const stream = fs.createReadStream(csvFilePath).pipe(csv());
-
-  // Parse each row and accumulate into the array
-  for await (const row of stream) {
-    rowCount++;
-    if (!row.name || !row.email) {
-      console.warn(`Row ${rowCount}: Missing required fields. Skipping row.`);
+    if (!name || !email) {
+      console.warn('Skipping row missing name/email:', raw);
       continue;
     }
 
-    // Normalize fields: convert email, university, and track to lowercase
+    /* normalise the rest */
     const student = {
-      name: row.name,
-      email: row.email.toLowerCase(),
-      university: row.university ? row.university.toLowerCase() : null,
-      track: row.track ? row.track.toLowerCase() : null,
-      major: row.major ? row.major.toLowerCase() : null, 
-      classification: row.classification ? row.classification.toLowerCase() : null, 
-      attendance_count: parseInt(row.attendance_count, 10) || 1
+      name,
+      email,
+      university    : (raw.university     ?? raw.University     ?? '').toLowerCase() || null,
+      track         : (raw.track          ?? raw.Track          ?? '').toLowerCase() || null,
+      major         : (raw.major          ?? raw.Major          ?? '').toLowerCase() || null,
+      classification: (raw.classification ?? raw.Classification ?? '').toLowerCase() || null,
+      attendance    : Number(
+                        raw.attendance_count ??
+                        raw['Attendance Count'] ??
+                        raw.Attendance ??
+                        1
+                      ) || 1
     };
 
-    parsedStudents.push(student);
+    try {
+      /* duplicate check */
+      const dup = await db.query(
+        'SELECT attendance_count FROM users WHERE email = $1',
+        [student.email]
+      );
+
+      if (dup.rows.length) {
+        /* update attendance */
+        await db.query(
+          'UPDATE users SET attendance_count = attendance_count + $1 WHERE email = $2',
+          [student.attendance, student.email]
+        );
+        console.log(`Updated ${student.email} (+${student.attendance})`);
+      } else {
+        /* insert new */
+        const id = `USR-${nextId++}`;
+        await db.query(
+          `INSERT INTO users
+             (id, name, email, university, track, major, classification,
+              attendance_count, certificateEligible)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
+          [
+            id, student.name, student.email, student.university,
+            student.track, student.major, student.classification,
+            student.attendance, false
+          ]
+        );
+        console.log(`Inserted ${student.email} → ${id}`);
+      }
+    } catch (e) {
+      console.error(`DB error for ${student.email}:`, e.message);
+    }
   }
-
-  console.log(`CSV file parsed successfully! Total rows processed: ${rowCount}`);
-  console.log("Parsed data array:", parsedStudents);
-
-  // Now pass the parsed array to the storeStudents function
-  await storeStudents(parsedStudents);
 }
 
-// If importCsv.js is run directly, call processCSV(); otherwise, export storeStudents.
+/* ───────────────── optional CLI parser ─────────────────
+   Run “node server/importCsv.js” to load example.csv locally. */
+async function processCSV() {
+  const parsed = [];
+  let row = 0;
+
+  const stream = fs.createReadStream(csvFilePath).pipe(csv());
+  for await (const r of stream) {
+    row++;
+    const name  = r.name ?? r.Name;
+    const email = r.email ?? r.Email;
+    if (!name || !email) {
+      console.warn(`Row ${row} skipped (missing name/email)`);
+      continue;
+    }
+    parsed.push(r);
+  }
+  console.log(`Parsed ${parsed.length}/${row} rows from CSV`);
+  await storeStudents(parsed);
+}
+
 if (require.main === module) {
-  processCSV().catch(err => {
-    console.error('Error processing CSV file:', err.message);
-  });
+  processCSV().catch(e => console.error('CSV load error:', e.message));
 }
 
+/* Export for the /upload-csv route */
 module.exports = { storeStudents };
