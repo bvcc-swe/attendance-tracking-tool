@@ -1,17 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, } from "react";
 import UserProfileCard from "./UserProfileCard"; // Removed .tsx
-const StudentProfile = ({ students }) => {  
+
+const StudentProfilePage = ({ students = [] }) => {  
   // State for search input
   const [searchQuery, setSearchQuery] = useState("");
-
   // State for sorting option
   const [sortOption, setSortOption] = useState("");
-
   // Function to handle search input changes
   const handleSearch = (event) => {
     setSearchQuery(event.target.value);
   };
-
+ 
+  console.log("Received students:", students); //display student array in console if received
   // Filter and sort students
   const sortedStudents = [...students]
     .filter((student) =>
@@ -26,9 +26,40 @@ const StudentProfile = ({ students }) => {
       return 0;
     });
 
+  // Function to generate dynamic heading for the header (Student Profiles) based on filtering options
+  const generateHeading = () => {
+    if (!searchQuery && !sortOption) {  //Show default of "Student Profiles" if nothing is search or sorted.
+      return "Student Profiles";
+    }
+    
+    let heading = "Student Profiles";
+    
+    if (searchQuery) {
+      heading = `Students matching "${searchQuery}"`;  //If searching, display, "students matching, *userinput*
+    }
+    
+    if (sortOption) {
+      const sortDescriptions = {
+        "school": "Sorted by School",
+        "track": "Sorted by Track",
+        "attendance-high-low": "Highest Attendance First",
+        "attendance-low-high": "Lowest Attendance First"
+      };  //handles display of dynamic header when sorting
+      
+      if (searchQuery) {
+        heading += ` - ${sortDescriptions[sortOption]}`;
+      } else {
+        heading = `Student Profiles - ${sortDescriptions[sortOption]}`;
+      }
+    }
+    // Add count of results
+    heading += ` (${sortedStudents.length} results)`;  //show the number of results for each search or sort query
+    
+    return heading;
+  };
   return (
     <div style={{ textAlign: "center", margin: "20px" }}>
-      <h2>Student Profiles</h2>
+      <h2>{generateHeading()}</h2>
 
       {/* Search Bar Styling */}
       <input
@@ -37,7 +68,8 @@ const StudentProfile = ({ students }) => {
         value={searchQuery}
         onChange={handleSearch}
         style={{
-          padding: "8px",
+          padding: "10px",
+          width: "170px",
           margin: "10px",
           borderRadius: "5px",
           border: "1px solid #ccc",
@@ -85,4 +117,4 @@ const StudentProfile = ({ students }) => {
   );
 };
 
-export default StudentProfile;
+export default StudentProfilePage;

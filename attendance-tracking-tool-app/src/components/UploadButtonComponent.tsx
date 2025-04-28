@@ -20,7 +20,7 @@ const UploadButton: React.FC<UploadButtonProps> = ({ onFileUpload }) => {
         skipEmptyLines: true,
         complete: async function (results: ParseResult<any>) {
           const parsedData = results.data;
-          console.log("Parsed data being sent:", parsedData);  //displays the parsed
+          console.log("Parsed data being sent:", parsedData);  //displays the parsed data
           try {
             
             const response = await fetch("http://localhost:6060/upload-csv", {
@@ -35,8 +35,10 @@ const UploadButton: React.FC<UploadButtonProps> = ({ onFileUpload }) => {
               throw new Error("Failed to upload and parse CSV data.");
             }
 
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const data = await response.text();
-            console.log("Server response:", data);
+            console.log("response status", response.status)
+            console.log("Server response:", response.body);
             alert("CSV uploaded and processed successfully!");
           } catch (error: any) {
             console.error("Error uploading parsed data:", error.message);
