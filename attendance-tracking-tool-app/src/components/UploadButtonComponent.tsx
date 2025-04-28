@@ -1,14 +1,14 @@
 import React from "react";
 import Papa, { ParseResult } from "papaparse";
 import "../assets/styles/upload.css";
-import { useNavigate } from "react-router-dom";
+
 
 interface UploadButtonProps {
   onFileUpload?: (file: File) => void;
 }
 
 const UploadButton: React.FC<UploadButtonProps> = ({ onFileUpload }) => {
-  const navigate = useNavigate();
+  
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
       const file = event.target.files[0];
@@ -52,9 +52,6 @@ const UploadButton: React.FC<UploadButtonProps> = ({ onFileUpload }) => {
 
   return (
     <div className="upload-container">
-      <h1 onClick={() => navigate('/')}
-        style={{ cursor: 'pointer' }}>
-        BVCC Attendance Tracking Tool</h1>
       <label htmlFor="file-upload" className="custom-file-upload">
         Upload CSV File
       </label>
