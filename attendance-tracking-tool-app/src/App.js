@@ -27,7 +27,11 @@ function AppContent() {
   return (
     <div>
       <h1 onClick={() => navigate('/')}
-        style={{ cursor: 'pointer' }}>
+        style={{
+          
+          textAlign: 'center',
+          marginTop: '20px', // optional: adjust vertical spacing
+          cursor: 'pointer' }}>
         BVCC Attendance Tracking Tool</h1>
       {/* Only show UploadCSVButton if the user is not on student profiles page */}
       { !isOnStudentProfilePage && <UploadButton />}
