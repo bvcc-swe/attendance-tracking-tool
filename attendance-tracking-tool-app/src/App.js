@@ -10,6 +10,7 @@ function AppContent() {
   const location = useLocation();
   const navigate = useNavigate();
   const isOnStudentProfilePage = location.pathname === "/student-profile";
+  // eslint-disable-next-line
   const [ setParsedData] = useState([]); // Holds uploaded students
   const [students, setStudents] = useState([]);
 
