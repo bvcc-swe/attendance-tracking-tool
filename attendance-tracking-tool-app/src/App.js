@@ -4,10 +4,13 @@ import React, { useEffect, useState } from "react";
 import { BrowserRouter as Router, Route, Routes, useLocation } from "react-router-dom";
 import StudentProfilePage from "./components/StudentProfilePage.js";
 import StudentProfileButton from './components/StudentProfileButton';
+import { useNavigate } from "react-router-dom";
 
 function AppContent() {
   const location = useLocation();
+  const navigate = useNavigate();
   const isOnStudentProfilePage = location.pathname === "/student-profile";
+  // eslint-disable-next-line
   const [ setParsedData] = useState([]); // Holds uploaded students
   const [students, setStudents] = useState([]);
 
@@ -23,7 +26,13 @@ function AppContent() {
 
   return (
     <div>
-
+      <h1 onClick={() => navigate('/')}
+        style={{
+          
+          textAlign: 'center',
+          marginTop: '20px', // optional: adjust vertical spacing
+          cursor: 'pointer' }}>
+        BVCC Attendance Tracking Tool</h1>
       {/* Only show UploadCSVButton if the user is not on student profiles page */}
       { !isOnStudentProfilePage && <UploadButton />}
 
