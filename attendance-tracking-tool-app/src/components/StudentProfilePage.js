@@ -10,7 +10,18 @@ const StudentProfilePage = ({ students = [] }) => {
   const handleSearch = (event) => {
     setSearchQuery(event.target.value);
   };
- 
+  // List of all schools in the BVCC curiculum program 
+  const allSchools = [
+  "North Carolina A&T University",
+  "Morgan State University",
+  "Howard University",
+  "Florida A & M University",
+  "Spellman College",
+  "Morehouse College",
+  "Tennessee State University",
+  "Clark Atlanta University",
+  "Wellesley College",  
+];
   console.log("Received students:", students); //display student array in console if received
   // Filter and sort students
   const sortedStudents = [...students]
@@ -57,6 +68,80 @@ const StudentProfilePage = ({ students = [] }) => {
     
     return heading;
   };
+    // Helper function to normalize school names for comparison
+  const normalizeSchoolName = (name) => {
+    if (!name) return "";
+    return name.toLowerCase()
+      .replace(/\s+/g, ' ')  // Normalize spaces
+      .trim();
+  };
+  // Helper function to find the official school name regardless of casing or minor variations
+  const findOfficialSchoolName = (studentSchool) => {
+    const normalizedStudentSchool = normalizeSchoolName(studentSchool);
+    
+    // Handle common abbreviations
+    const abbreviations = {
+      "nc a&t": "North Carolina A&T University",
+      "morgan": "Morgan State University",
+      "morgan state": "Morgan State University",
+      "howard": "Howard University",
+      "famu": "Florida A & M University",
+      "florida a&m": "Florida A & M University",
+      "spellman": "Spellman College",
+      "morehouse": "Morehouse College",
+      "tsu": "Tennessee State University",
+      "tennessee state": "Tennessee State University",
+      "clark atlanta": "Clark Atlanta University",
+      "cau": "Clark Atlanta University"
+    };
+    // Check if it's a direct abbreviation
+    if (abbreviations[normalizedStudentSchool]) {
+      return abbreviations[normalizedStudentSchool];
+    }
+    
+    // Try to match with official school names ignoring case
+    for (const school of allSchools) {
+      if (normalizeSchoolName(school).includes(normalizedStudentSchool) || 
+          normalizedStudentSchool.includes(normalizeSchoolName(school))) {
+        return school;
+      }
+    }
+    
+    // If no match, return the original school name
+    return studentSchool;
+  };
+
+    // Group students by school - this includes all schools with their students (if any)
+  const groupStudentsBySchool = () => {
+    // Initialize with all schools having empty arrays
+    const groupedBySchool = {};
+    allSchools.forEach(school => {
+      groupedBySchool[school] = [];
+    });
+    
+    // Add students to their respective schools
+    sortedStudents.forEach(student => {
+      const officialSchoolName = findOfficialSchoolName(student.university);
+      // If the student's university is in our list, add them
+      if (groupedBySchool.hasOwnProperty(officialSchoolName)) {
+        // Clone the student and update the university name to the official one
+        const normalizedStudent = {
+          ...student,
+          displayUniversity: student.university, // Keep original for display if needed
+          university: officialSchoolName // Use the official name for grouping
+        };
+        groupedBySchool[officialSchoolName].push(normalizedStudent);
+      } else {
+        // Handle students from schools not in our predefined list
+        if (!groupedBySchool["Other Schools"]) {
+          groupedBySchool["Other Schools"] = [];
+        }
+        groupedBySchool["Other Schools"].push(student);
+      }
+    });
+    
+    return groupedBySchool;
+  };
   return (
     <div style={{ textAlign: "center", margin: "20px" }}>
       <h2>{generateHeading()}</h2>
@@ -94,8 +179,34 @@ const StudentProfilePage = ({ students = [] }) => {
         <option value="attendance-low-high">Attendance Count (Low to High)</option>
       </select>
 
-
-      {/* Render Sorted Students on the page */}
+      {/* Render Grouped by School if sorted by school */}
+      {sortOption === "school" ? (
+        Object.entries(groupStudentsBySchool()).map(([university, students]) => (
+          <div key={university} style={{ marginBottom: "30px", textAlign: "left" }}>
+            <h2>{university}</h2>
+            {students.length > 0 ? (
+              <div className="profile-container">
+                {students.map((student, index) => (
+                  <UserProfileCard
+                    key={index}
+                    name={student.name}
+                    email={student.email}
+                    university={student.university}
+                    major={student.major}
+                    classification={student.classification}
+                    track={student.track}
+                    attendanceCount={student.attendance_count}
+                    isEligibleForCertificate={student.attendance_count >= 7}
+                  />
+                ))}
+              </div>
+            ) : (
+              <p>No students from this school.</p>
+            )}
+          </div>
+        ))
+      ) : (
+        // Default Rendering Sorted Students on the page
       <div className="profile-container">
         {sortedStudents.map((student, index) => (
           <UserProfileCard
@@ -113,7 +224,8 @@ const StudentProfilePage = ({ students = [] }) => {
           //if they have an attendance count greater than 7 since the program is a 10 week long program
         ))}
       </div>
-    </div>
+      )}
+    </div> // closing of stlye div
   );
 };
 
